@@ -20,18 +20,17 @@ def AreRoisOverlapped(roi1, roi2) :
 
 def SeekCsvDialect(fn) :
     """Seek dialect in the file and return the dialect"""
-    D = ','
-    with io.open(fn, 'r', newline='') as infile :
-        ln = infile.readline()
+    first100lns = [ln for i, ln in enumerate(io.open(fn, 'r', newline='')) if i < 100]
+    dlist = []
+    offset = 0
+    for ln in first100lns :
         dialect = csv.Sniffer().sniff(ln)
-        offset = 0
-        row = 0
-        while dialect.delimiter != D : 
-            lastD = dialect.delimiter
-            offset += len(ln)
-            row += 1
-            ln = infile.readline()
-            dialect = csv.Sniffer().sniff(ln)
+        dlist.append((offset, dialect))
+        offset += len(ln)
+    target = dlist[-1][1].delimiter
+    for offset, dialect in dlist : 
+        if dialect.delimiter == target : 
+            break 
     return dialect, offset
 
 # I/O
